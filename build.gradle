@@ -1,3 +1,21 @@
+//TODO: change project structure so that these 2 blocks are in a top-level build file and include
+// a sample use module
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.2'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+    }
+}
+allprojects {
+    repositories {
+        jcenter()
+        maven { url 'https://maven.google.com' }
+    }
+}
+
 apply plugin: 'com.android.library'
 
 apply plugin: 'com.github.dcendents.android-maven'
