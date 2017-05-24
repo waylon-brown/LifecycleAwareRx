@@ -11,11 +11,11 @@ import io.reactivex.disposables.Disposable;
 public class RxTerminatingLifecycleObserver implements LifecycleObserver {
     private final String TAG = RxTerminatingLifecycleObserver.class.getSimpleName();
 
-    private final LifecycleOwner lifecycleOwner;
-    private final Lifecycle.State terminalState;
+    private Lifecycle.State terminalState;
+    private LifecycleOwner lifecycleOwner;
     private Disposable disposable;
 
-    public RxTerminatingLifecycleObserver(final LifecycleOwner lifecycleOwner, final Lifecycle.State terminalState) {
+    RxTerminatingLifecycleObserver(final LifecycleOwner lifecycleOwner, final Lifecycle.State terminalState) {
         this.lifecycleOwner = lifecycleOwner;
         this.terminalState = terminalState;
         lifecycleOwner.getLifecycle().addObserver(this);
@@ -28,7 +28,7 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
         disposeIfReachedTerminalState();
     }
 
-    public void setDisposable(Disposable disposable) {
+    void setDisposable(Disposable disposable) {
         this.disposable = disposable;
         disposeIfReachedTerminalState();
     }
@@ -38,6 +38,8 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
                 && disposable != null
                 && !disposable.isDisposed()) {
             disposable.dispose();
+            lifecycleOwner.getLifecycle().removeObserver(this);
+            lifecycleOwner = null;  // No memory leaks please
             Log.i(TAG, "Disposed");
         }
     }
@@ -46,7 +48,7 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
      * We're overriding the equals() and hashCode() so that when
      * {@link android.arch.lifecycle.LifecycleRegistry#addObserver(LifecycleObserver)}
      * works its magic, it will replace a previously set observer from this class that has the
-     * same {@link LifecycleOwner}
+     * same {@link LifecycleOwner}.
      */
     @Override
     public boolean equals(Object o) {
@@ -56,7 +58,6 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
         RxTerminatingLifecycleObserver that = (RxTerminatingLifecycleObserver) o;
 
         return lifecycleOwner != null ? lifecycleOwner.equals(that.lifecycleOwner) : that.lifecycleOwner == null;
-
     }
 
     @Override
