@@ -44,7 +44,7 @@ getMyObservable()
 ```
 
 ## To use
-Right now the library is in its early stages so it isn't hosted anywhere. If there's enough positive feedback, that will happen soon. For now, clone this to the same directory that your project is at (not inside your project, this is just so that the git repos are seperate), then change your settings.gradle to
+Right now the library is in its early stages so it isn't hosted anywhere. If people find it of use, that will happen soon. For now, clone this to the same directory that your project is at (not inside your project, this is just so that the git repos are seperate), then change your settings.gradle to
 
 ```
 include ':app', ':lifecycleawarerx'
