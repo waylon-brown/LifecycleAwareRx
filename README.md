@@ -2,7 +2,7 @@
 
 ## Lifecycle-aware RxJava2
 
-With the introduction to Android Architecture Components, Google added `LiveData` to their Lifecycle component which is a very simple observable, but it is "lifecycle-aware" - it takes advantage of a new API in Activities and Fragments: LifecycleOwner, which has lifecycle state callbacks. Because of this, LiveData is lifecycle-aware, meaning that once the Activity/Fragment is destroyed, so is the LiveData automatically. Goodbye memory leaks.
+With the introduction to Android Architecture Components, Google added `LiveData` to their Lifecycle component which is a very simple observable, but it is "lifecycle-aware" - it takes advantage of a new API in Activities and Fragments: LifecycleOwner, which has lifecycle state callbacks. Once the Activity/Fragment is destroyed, so is the LiveData automatically. Goodbye memory leaks.
 
 LifecycleAwareRx is a lightweight library that lets RxJava leverage the same API, making your reactive streams life-cycle aware with Android's first-party lifecycle API. Right now this is with the use of Google's new `LifecycleActivity` and `LifecycleFragment`, but very soon they are going to bake the LifecycleOwner API directly into the support library's Activity/Fragment, meaning you'll be able to use this library with your current Activities and Fragments with no changes.
 
