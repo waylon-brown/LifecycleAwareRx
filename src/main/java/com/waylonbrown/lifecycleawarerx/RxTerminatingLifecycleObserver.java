@@ -41,4 +41,26 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
             Log.i(TAG, "Disposed");
         }
     }
+
+    /**
+     * We're overriding the equals() and hashCode() so that when
+     * {@link android.arch.lifecycle.LifecycleRegistry#addObserver(LifecycleObserver)}
+     * works its magic, it will replace a previously set observer from this class that has the
+     * same {@link LifecycleOwner}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RxTerminatingLifecycleObserver that = (RxTerminatingLifecycleObserver) o;
+
+        return lifecycleOwner != null ? lifecycleOwner.equals(that.lifecycleOwner) : that.lifecycleOwner == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return lifecycleOwner != null ? lifecycleOwner.hashCode() : 0;
+    }
 }
