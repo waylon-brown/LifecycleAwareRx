@@ -18,21 +18,27 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
     public RxTerminatingLifecycleObserver(final LifecycleOwner lifecycleOwner, final Lifecycle.State terminalState) {
         this.lifecycleOwner = lifecycleOwner;
         this.terminalState = terminalState;
+        lifecycleOwner.getLifecycle().addObserver(this);
     }
 
     @SuppressWarnings("unused")
     @OnLifecycleEvent(Lifecycle.Event.ON_ANY)
     void onStateChange() {
         Log.i(TAG, "Lifecycle changed to " + lifecycleOwner.getLifecycle().getCurrentState().toString());
+        disposeIfReachedTerminalState();
+    }
+
+    public void setDisposable(Disposable disposable) {
+        this.disposable = disposable;
+        disposeIfReachedTerminalState();
+    }
+
+    private void disposeIfReachedTerminalState() {
         if (lifecycleOwner.getLifecycle().getCurrentState() == terminalState
-            && disposable != null
-            && !disposable.isDisposed()) {
+                && disposable != null
+                && !disposable.isDisposed()) {
             disposable.dispose();
             Log.i(TAG, "Disposed");
         }
-    }
-    
-    public void setDisposable(Disposable disposable) {
-        this.disposable = disposable;
     }
 }
