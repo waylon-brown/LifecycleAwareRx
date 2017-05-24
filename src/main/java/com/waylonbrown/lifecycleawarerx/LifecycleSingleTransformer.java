@@ -8,15 +8,12 @@ import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 
 public class LifecycleSingleTransformer<T> implements SingleTransformer<T, T> {
+
     private final LifecycleOwner lifecycleOwner;
     private RxTerminatingLifecycleObserver observer;
-    private final Lifecycle.State state;
-    private Single<T> single;
 
     public LifecycleSingleTransformer(final LifecycleOwner lifecycleOwner, final Lifecycle.State state) {
         this.lifecycleOwner = lifecycleOwner;
-        this.state = state;
-
         this.observer = new RxTerminatingLifecycleObserver(lifecycleOwner, state);
         lifecycleOwner.getLifecycle().addObserver(observer);
     }

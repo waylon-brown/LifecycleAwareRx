@@ -7,9 +7,10 @@ import android.arch.lifecycle.OnLifecycleEvent;
 import android.util.Log;
 
 import io.reactivex.disposables.Disposable;
-import timber.log.Timber;
 
 public class RxTerminatingLifecycleObserver implements LifecycleObserver {
+    private final String TAG = RxTerminatingLifecycleObserver.class.getSimpleName();
+
     private final LifecycleOwner lifecycleOwner;
     private final Lifecycle.State terminalState;
     private Disposable disposable;
@@ -22,12 +23,12 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
     @SuppressWarnings("unused")
     @OnLifecycleEvent(Lifecycle.Event.ON_ANY)
     void onStateChange() {
-        Timber.i("Lifecycle changed to " + lifecycleOwner.getLifecycle().getCurrentState().toString());
+        Log.i(TAG, "Lifecycle changed to " + lifecycleOwner.getLifecycle().getCurrentState().toString());
         if (lifecycleOwner.getLifecycle().getCurrentState() == terminalState
             && disposable != null
             && !disposable.isDisposed()) {
             disposable.dispose();
-            Timber.i("Disposed");
+            Log.i(TAG, "Disposed");
         }
     }
     
