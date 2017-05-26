@@ -3,7 +3,7 @@ package com.waylonbrown.lifecycleawarerx;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 
-public class LifecycleComposer {
+public class LifecycleBinder {
 
     public static <T> LifecycleObservableTransformer<T> bindLifeCycle(LifecycleOwner lifecycleOwner) {
         return disposeOnLifecycleEvent(lifecycleOwner, Lifecycle.State.DESTROYED);
