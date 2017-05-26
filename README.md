@@ -24,24 +24,7 @@ getMyObservable()
                 ...
 ```
 
-Lastly, it also works with the other base reactive types.
-
-```Java
-// Single
-getMyObservable()
-  .compose(LifecycleComposer.Single.bindLifeCycle(this))
-  ...
-         
-// Completable
-getMyObservable()
-  .compose(LifecycleComposer.Completable.bindLifeCycle(this))
-  ...
-         
-// Maybe
-getMyObservable()
-  .compose(LifecycleComposer.Maybe.bindLifeCycle(this))
-  ...
-```
+Using `LifecycleComposer` will return the correct transformer given your stream's base reactive type, whether it's an **Observable**, **Single**, **Maybe**, or **Completable**.
 
 ## New library features
 
