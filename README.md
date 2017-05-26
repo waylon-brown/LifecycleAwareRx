@@ -43,6 +43,10 @@ getMyObservable()
   ...
 ```
 
+## New library features
+
+Right now when the Activity/Fragment is destroyed, the stream is disposed and the LifecycleOwner reference is thrown away. Currently I'm working on only starting the stream when the Activity/Fragment is started, just as is currently done in `LiveData`. **I am very open to any new feature suggestions, so please add Github issues if there's something that should be added to get to feature parity with `LiveData`.**
+
 ## Add to your project
 Add the jitpack repository if you haven't already to your *top-level project build.gradle.*
 
