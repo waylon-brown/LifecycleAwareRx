@@ -40,7 +40,7 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
             disposable.dispose();
             lifecycleOwner.getLifecycle().removeObserver(this);
             lifecycleOwner = null;  // No memory leaks please
-            Log.i(TAG, "Disposed");
+            Log.i(TAG, "Disposed stream because reached terminal state.");
         }
     }
 
