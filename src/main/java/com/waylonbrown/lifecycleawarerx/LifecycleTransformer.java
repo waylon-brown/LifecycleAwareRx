@@ -30,11 +30,11 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 	@Nullable
 	private RxTerminatingLifecycleObserver observer;
 
-	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner, final Lifecycle.State state) {
+	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner) {
 		if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
 			return;
 		}
-		this.observer = new RxTerminatingLifecycleObserver(lifecycleOwner, state);
+		this.observer = new RxTerminatingLifecycleObserver(lifecycleOwner);
 	}
 
 	@Override
@@ -64,8 +64,7 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 	private void setDisposableToObserver(Disposable disposable) {
 		if (this.observer != null) {
 			this.observer.setDisposable(disposable);
-		} else {
-			// Is null because it the LifecycleOwner is in destroyed state
+		} else { // Is null because the LifecycleOwner is in destroyed state
 			disposable.dispose();
 			Log.i(TAG, "Disposed stream because it was already destroyed.");
 		}
