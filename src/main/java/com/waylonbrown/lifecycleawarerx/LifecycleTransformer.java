@@ -54,7 +54,14 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 
 	@Override
 	public ObservableSource<T> apply(final Observable<T> upstream) {
-		setDisposableAndReturnIfDisposed(upstream.subscribe());
+		if (!setDisposableAndReturnIfDisposed(upstream.subscribe())
+			&& lifecycleObserver != null
+			&& baseReactiveType != null) {
+
+			// Replay emitted values to late subscriber
+			upstream.cache();
+			setReactiveType((R)upstream);
+		}
 		return upstream;
 	}
 
@@ -63,25 +70,36 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 		if(!setDisposableAndReturnIfDisposed(upstream.subscribe())
 			&& lifecycleObserver != null
 			&& baseReactiveType != null) {
-			
+
 			// Replay emitted values to late subscriber
 			upstream.cache();
-			
-			baseReactiveType.setReactiveType((R)upstream);
-			lifecycleObserver.setBaseReactiveType(baseReactiveType);
+			setReactiveType((R)upstream);
 		}
 		return upstream;
 	}
 
 	@Override
 	public MaybeSource<T> apply(Maybe<T> upstream) {
-		setDisposableAndReturnIfDisposed(upstream.subscribe());
+		if (!setDisposableAndReturnIfDisposed(upstream.subscribe())
+			&& lifecycleObserver != null
+			&& baseReactiveType != null) {
+
+			// Replay emitted values to late subscriber
+			upstream.cache();
+			setReactiveType((R)upstream);
+		}
 		return upstream;
 	}
 
 	@Override
 	public CompletableSource apply(Completable upstream) {
-		setDisposableAndReturnIfDisposed(upstream.subscribe());
+		if (!setDisposableAndReturnIfDisposed(upstream.subscribe())
+			&& lifecycleObserver != null
+			&& baseReactiveType != null) {
+			
+			// Can't cache a Completable
+			setReactiveType((R)upstream);
+		}
 		return upstream;
 	}
 
@@ -99,5 +117,10 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 		baseReactiveType = null;
 		Log.i(TAG, "Disposed stream because it was already destroyed.");
 		return true;
+	}
+
+	private void setReactiveType(final R upstream) {
+		baseReactiveType.setReactiveType(upstream);
+		lifecycleObserver.setBaseReactiveType(baseReactiveType);
 	}
 }
