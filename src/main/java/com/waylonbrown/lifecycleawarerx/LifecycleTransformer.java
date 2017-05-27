@@ -6,6 +6,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
+import com.waylonbrown.lifecycleawarerx.reactivetypes.SingleWithObserver;
+
 import io.reactivex.Completable;
 import io.reactivex.CompletableSource;
 import io.reactivex.CompletableTransformer;
@@ -16,11 +19,18 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
+import io.reactivex.SingleObserver;
 import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
 
-public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
+/**
+ * 
+ * @param <T> stream inner type
+ * @param <R> reactive type
+ * @param <O> observer type
+ */
+public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T>,
 		SingleTransformer<T, T>,
 		MaybeTransformer<T, T>,
 		CompletableTransformer {
@@ -28,18 +38,18 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 	private final String TAG = LifecycleTransformer.class.getSimpleName();
 
 	@Nullable
-	private BaseReactiveTypeWithObserver<T> baseReactiveType;
+	private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
 
 	@Nullable
 	private RxLifecycleObserver lifecycleObserver;
 
 	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner,
-						 @Nullable final BaseReactiveTypeWithObserver<T> baseReactiveType) {
+						 @Nullable final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
 		if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
 			return;
 		}
 		this.baseReactiveType = baseReactiveType;
-		this.lifecycleObserver = new RxLifecycleObserver(lifecycleOwner);
+		this.lifecycleObserver = new RxLifecycleObserver<>(lifecycleOwner);
 	}
 
 	@Override
@@ -50,12 +60,16 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 
 	@Override
 	public SingleSource<T> apply(Single<T> upstream) {
-		if(!setDisposableAndReturnIfDisposed(upstream.subscribe()) 
+		if(!setDisposableAndReturnIfDisposed(upstream.subscribe())
+			&& lifecycleObserver != null
 			&& baseReactiveType != null) {
-			// TODO: add to the interface so I don't have to do this
-			SingleWrapper<T> singleWrapper = (SingleWrapper<T>)baseReactiveType;
-			singleWrapper.setSingle(upstream);
-			lifecycleObserver.setBaseReactiveType(singleWrapper);
+			
+			// Replay emitted values to late subscriber
+			upstream.cache();
+			
+			baseReactiveType.setReactiveType((R)upstream);
+			// TODO: unchecked type?
+			lifecycleObserver.setBaseReactiveType(baseReactiveType);
 		}
 		return upstream;
 	}

@@ -8,11 +8,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
+import com.waylonbrown.lifecycleawarerx.reactivetypes.SingleWithObserver;
 import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
 
 import io.reactivex.disposables.Disposable;
 
-public class RxLifecycleObserver<T> implements LifecycleObserver {
+public class RxLifecycleObserver<T, R, O> implements LifecycleObserver {
     private final String TAG = RxLifecycleObserver.class.getSimpleName();
 
     /**
@@ -25,7 +27,7 @@ public class RxLifecycleObserver<T> implements LifecycleObserver {
     @Nullable private Disposable disposable;
     
     // Used for starting the stream once LifecycleOwner is active
-    @Nullable private BaseReactiveTypeWithObserver<T> baseReactiveType;
+    @Nullable private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
     private boolean subscribed = false;
 
     RxLifecycleObserver(@NonNull final LifecycleOwner lifecycleOwner) {
@@ -45,7 +47,7 @@ public class RxLifecycleObserver<T> implements LifecycleObserver {
         handleCurrentLifecycleState();
     }
 
-    public void setBaseReactiveType(final BaseReactiveTypeWithObserver<T> baseReactiveType) {
+    public void setBaseReactiveType(final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
         this.baseReactiveType = baseReactiveType;
     }
 
@@ -54,9 +56,10 @@ public class RxLifecycleObserver<T> implements LifecycleObserver {
             endStreamAndCleanup();
         } else if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && baseReactiveType != null) {
             Log.i(TAG, "Subscribing to observer.");
-            // TODO: add into the interface with generics so I don't need to do this
-            SingleWrapper<T> singleWrapper = (SingleWrapper<T>)baseReactiveType; 
-            singleWrapper.getSingle().subscribe(singleWrapper.getSingleObserver());
+            
+            // Subscribe to stream with observer since the LifecycleOwner is now active but wasn't previously
+            ((SingleWithObserver<T>) baseReactiveType).getReactiveType().subscribe(((SingleWithObserver<T>) 
+                baseReactiveType).getObserver());
             subscribed = true;
         }
     }
