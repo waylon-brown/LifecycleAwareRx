@@ -11,4 +11,6 @@ public interface BaseReactiveTypeWithObserver<R, O> {
     O getObserver();
     
     void setReactiveType(R reactiveType);
+    
+    void subscribeWithObserver();
 }

@@ -14,7 +14,7 @@ import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
 
 import io.reactivex.disposables.Disposable;
 
-public class RxLifecycleObserver<T, R, O> implements LifecycleObserver {
+public class RxLifecycleObserver<R, O> implements LifecycleObserver {
     private final String TAG = RxLifecycleObserver.class.getSimpleName();
 
     /**
@@ -58,8 +58,8 @@ public class RxLifecycleObserver<T, R, O> implements LifecycleObserver {
             Log.i(TAG, "Subscribing to observer.");
             
             // Subscribe to stream with observer since the LifecycleOwner is now active but wasn't previously
-            ((SingleWithObserver<T>) baseReactiveType).getReactiveType().subscribe(((SingleWithObserver<T>) 
-                baseReactiveType).getObserver());
+            baseReactiveType.subscribeWithObserver();
+
             subscribed = true;
         }
     }

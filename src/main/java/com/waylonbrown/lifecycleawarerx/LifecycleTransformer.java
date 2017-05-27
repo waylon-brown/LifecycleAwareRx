@@ -41,7 +41,7 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 	private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
 
 	@Nullable
-	private RxLifecycleObserver lifecycleObserver;
+	private RxLifecycleObserver<R, O> lifecycleObserver;
 
 	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner,
 						 @Nullable final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
@@ -68,7 +68,6 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 			upstream.cache();
 			
 			baseReactiveType.setReactiveType((R)upstream);
-			// TODO: unchecked type?
 			lifecycleObserver.setBaseReactiveType(baseReactiveType);
 		}
 		return upstream;
