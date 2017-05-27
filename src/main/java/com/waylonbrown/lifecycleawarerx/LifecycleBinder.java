@@ -8,6 +8,7 @@ import com.waylonbrown.lifecycleawarerx.reactivetypes.ObservableWithObserver;
 import com.waylonbrown.lifecycleawarerx.reactivetypes.SingleWithObserver;
 
 import io.reactivex.CompletableObserver;
+import io.reactivex.CompletableTransformer;
 import io.reactivex.MaybeObserver;
 import io.reactivex.MaybeTransformer;
 import io.reactivex.ObservableTransformer;
@@ -44,8 +45,8 @@ public class LifecycleBinder {
         return new LifecycleTransformer<>(lifecycleOwner, new MaybeWithObserver<>(observer));
     }
 
-    public static <T> MaybeTransformer<T, T> bindToLifecycle(LifecycleOwner lifecycleOwner,
-                                                             CompletableObserver observer) {
+    public static <T> CompletableTransformer bindToLifecycle(LifecycleOwner lifecycleOwner,
+                                                                   CompletableObserver observer) {
         return new LifecycleTransformer<>(lifecycleOwner, new CompletableWithObserver(observer));
     }
 }
