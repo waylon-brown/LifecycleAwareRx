@@ -1,6 +1,7 @@
 package com.waylonbrown.lifecycleawarerx;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
@@ -10,12 +11,15 @@ import io.reactivex.SingleObserver;
  */
 public class SingleWrapper<T> implements BaseReactiveTypeWithObserver<T> {
 
-    @NonNull private final Single<T> single;
+    @Nullable private Single<T> single;
     @NonNull private final SingleObserver<T> singleObserver;
 
-    SingleWrapper(Single<T> single, SingleObserver<T> singleObserver) {
-        this.single = single;
+    SingleWrapper(@NonNull SingleObserver<T> singleObserver) {
         this.singleObserver = singleObserver;
+    }
+    
+    public void setSingle(Single<T> single) {
+        this.single = single;
     }
 
     @NonNull

@@ -16,7 +16,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
-import io.reactivex.SingleObserver;
 import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
@@ -27,20 +26,20 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 		CompletableTransformer {
 
 	private final String TAG = LifecycleTransformer.class.getSimpleName();
-	
-	@Nullable
-	private SingleObserver<T> singleObserver;
 
 	@Nullable
-	private RxLifecycleObserver observer;
+	private BaseReactiveTypeWithObserver<T> baseReactiveType;
 
-	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner, 
-						 @Nullable final SingleObserver<T> singleObserver) {
+	@Nullable
+	private RxLifecycleObserver lifecycleObserver;
+
+	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner,
+						 @Nullable final BaseReactiveTypeWithObserver<T> baseReactiveType) {
 		if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
 			return;
 		}
-		this.singleObserver = singleObserver;
-		this.observer = new RxLifecycleObserver(lifecycleOwner);
+		this.baseReactiveType = baseReactiveType;
+		this.lifecycleObserver = new RxLifecycleObserver(lifecycleOwner);
 	}
 
 	@Override
@@ -52,8 +51,11 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 	@Override
 	public SingleSource<T> apply(Single<T> upstream) {
 		if(!setDisposableAndReturnIfDisposed(upstream.subscribe()) 
-			&& singleObserver != null) {
-			this.observer.setBaseReactiveType(new SingleWrapper<>(upstream, singleObserver));
+			&& baseReactiveType != null) {
+			// TODO: add to the interface so I don't have to do this
+			SingleWrapper<T> singleWrapper = (SingleWrapper<T>)baseReactiveType;
+			singleWrapper.setSingle(upstream);
+			lifecycleObserver.setBaseReactiveType(singleWrapper);
 		}
 		return upstream;
 	}
@@ -75,13 +77,13 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 	 * @return true if the disposable was disposed because LifecycleOwner is already destroyed.
 	 */
 	private boolean setDisposableAndReturnIfDisposed(Disposable disposable) {
-		if (this.observer != null) {
-			this.observer.setDisposable(disposable);
+		if (this.lifecycleObserver != null) {
+			this.lifecycleObserver.setDisposable(disposable);
 			return false;
 		}
 		// Is null because the LifecycleOwner is in destroyed state
 		disposable.dispose();
-		singleObserver = null;
+		baseReactiveType = null;
 		Log.i(TAG, "Disposed stream because it was already destroyed.");
 		return true;
 	}
