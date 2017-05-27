@@ -10,26 +10,26 @@ import android.util.Log;
 
 import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
 
-import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableSingleObserver;
 
-public class RxTerminatingLifecycleObserver<T> implements LifecycleObserver {
-    private final String TAG = RxTerminatingLifecycleObserver.class.getSimpleName();
+public class RxLifecycleObserver<T> implements LifecycleObserver {
+    private final String TAG = RxLifecycleObserver.class.getSimpleName();
 
     /**
      * Since we're holding a reference to the LifecycleOwner, it's important that we remove this reference as soon
      * as it reaches a destroyed state to prevent a memory leak.
      */
-    private LifecycleOwner lifecycleOwner;
-    private final DisposableSingleObserver<T> disposableSingleObserver;
+    @NonNull private LifecycleOwner lifecycleOwner;
+    
+    // Used for destroying the stream
+    @Nullable private Disposable disposable;
+    
+    // Used for starting the stream once LifecycleOwner is active
+    @Nullable private BaseReactiveTypeWithObserver<T> baseReactiveType;
     private boolean subscribed = false;
-    @Nullable private Single<T> single;
 
-    RxTerminatingLifecycleObserver(@NonNull final LifecycleOwner lifecycleOwner, 
-                                       final DisposableSingleObserver<T> disposableSingleObserver) {
+    RxLifecycleObserver(@NonNull final LifecycleOwner lifecycleOwner) {
         this.lifecycleOwner = lifecycleOwner;
-        this.disposableSingleObserver = disposableSingleObserver;
         lifecycleOwner.getLifecycle().addObserver(this);
     }
 
@@ -40,25 +40,31 @@ public class RxTerminatingLifecycleObserver<T> implements LifecycleObserver {
         handleCurrentLifecycleState();
     }
 
-    void setSingle(final Single<T> single) {
-        this.single = single;
+    void setDisposable(Disposable disposable) {
+        this.disposable = disposable;
         handleCurrentLifecycleState();
+    }
+
+    public void setBaseReactiveType(final BaseReactiveTypeWithObserver<T> baseReactiveType) {
+        this.baseReactiveType = baseReactiveType;
     }
 
     private void handleCurrentLifecycleState() {
         if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
             endStreamAndCleanup();
-        } else if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && single != null) {
+        } else if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && baseReactiveType != null) {
             Log.i(TAG, "Subscribing to observer.");
-            single.subscribeWith(disposableSingleObserver);
+            // TODO: add into the interface with generics so I don't need to do this
+            SingleWrapper<T> singleWrapper = (SingleWrapper<T>)baseReactiveType; 
+            singleWrapper.getSingle().subscribe(singleWrapper.getSingleObserver());
             subscribed = true;
         }
     }
 
     private void endStreamAndCleanup() {
         Log.i(TAG, "LifecycleOwner is destroyed, disposing stream.");
-        if (single != null) {
-            single.subscribe().dispose();
+        if (disposable != null) {
+            disposable.dispose();
         }
         lifecycleOwner.getLifecycle().removeObserver(this);
         lifecycleOwner = null;  // No memory leaks please
@@ -75,7 +81,7 @@ public class RxTerminatingLifecycleObserver<T> implements LifecycleObserver {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        RxTerminatingLifecycleObserver that = (RxTerminatingLifecycleObserver) o;
+        RxLifecycleObserver that = (RxLifecycleObserver) o;
 
         return lifecycleOwner != null ? lifecycleOwner.equals(that.lifecycleOwner) : that.lifecycleOwner == null;
     }
