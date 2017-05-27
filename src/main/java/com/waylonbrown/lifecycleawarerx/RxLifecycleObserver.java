@@ -49,6 +49,7 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
 
     public void setBaseReactiveType(final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
         this.baseReactiveType = baseReactiveType;
+        handleCurrentLifecycleState();
     }
 
     private void handleCurrentLifecycleState() {
