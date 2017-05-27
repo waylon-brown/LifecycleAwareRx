@@ -12,16 +12,16 @@ import io.reactivex.SingleObserver;
 public class SingleWithObserver<T> implements BaseReactiveTypeWithObserver<Single<T>, SingleObserver<T>> {
 
     @Nullable private Single<T> single;
-    @NonNull private final SingleObserver<T> singleObserver;
+    @NonNull private final SingleObserver<T> observer;
 
-    public SingleWithObserver(@NonNull SingleObserver<T> singleObserver) {
-        this.singleObserver = singleObserver;
+    public SingleWithObserver(@NonNull SingleObserver<T> observer) {
+        this.observer = observer;
     }
 
     @Override
     public void subscribeWithObserver() {
         if (single != null) {
-            single.subscribe(singleObserver);
+            single.subscribe(observer);
         }
     }
 
@@ -39,6 +39,6 @@ public class SingleWithObserver<T> implements BaseReactiveTypeWithObserver<Singl
     @NonNull
     @Override
     public SingleObserver<T> getObserver() {
-        return singleObserver;
+        return observer;
     }
 }

@@ -19,9 +19,9 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
 
     /**
      * Since we're holding a reference to the LifecycleOwner, it's important that we remove this reference as soon
-     * as it reaches a destroyed state to prevent a memory leak.
+     * as it reaches a destroyed state to prevent a memory leak. Not using @NonNull since it is to later be set to null.
      */
-    @NonNull private LifecycleOwner lifecycleOwner;
+    private LifecycleOwner lifecycleOwner;
     
     // Used for destroying the stream
     @Nullable private Disposable disposable;
