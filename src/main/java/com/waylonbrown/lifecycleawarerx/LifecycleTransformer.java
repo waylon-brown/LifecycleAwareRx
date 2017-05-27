@@ -19,6 +19,7 @@ import io.reactivex.Single;
 import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableSingleObserver;
 
 public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 		SingleTransformer<T, T>,
@@ -30,11 +31,11 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 	@Nullable
 	private RxTerminatingLifecycleObserver observer;
 
-	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner) {
+	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner, final DisposableSingleObserver<T> disposableSingleObserver) {
 		if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
 			return;
 		}
-		this.observer = new RxTerminatingLifecycleObserver(lifecycleOwner);
+		this.observer = new RxTerminatingLifecycleObserver(lifecycleOwner, disposableSingleObserver);
 	}
 
 	@Override
@@ -45,7 +46,7 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 
 	@Override
 	public SingleSource<T> apply(Single<T> upstream) {
-		setDisposableToObserver(upstream.subscribe());
+		setSingleToObserver(upstream);
 		return upstream;
 	}
 
@@ -66,6 +67,15 @@ public class LifecycleTransformer<T> implements ObservableTransformer<T, T>,
 			this.observer.setDisposable(disposable);
 		} else { // Is null because the LifecycleOwner is in destroyed state
 			disposable.dispose();
+			Log.i(TAG, "Disposed stream because it was already destroyed.");
+		}
+	}
+
+	private void setSingleToObserver(Single<T> single) {
+		if (this.observer != null) {
+			this.observer.setSingle(single);
+		} else { // Is null because the LifecycleOwner is in destroyed state
+			single.subscribe().dispose();
 			Log.i(TAG, "Disposed stream because it was already destroyed.");
 		}
 	}

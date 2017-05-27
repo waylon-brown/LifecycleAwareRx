@@ -10,9 +10,11 @@ import android.util.Log;
 
 import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
 
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableSingleObserver;
 
-public class RxTerminatingLifecycleObserver implements LifecycleObserver {
+public class RxTerminatingLifecycleObserver<T> implements LifecycleObserver {
     private final String TAG = RxTerminatingLifecycleObserver.class.getSimpleName();
 
     /**
@@ -20,12 +22,14 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
      * as it reaches a destroyed state to prevent a memory leak.
      */
     private LifecycleOwner lifecycleOwner;
-    @Nullable
-    private Disposable disposable;
-    private boolean streamIsPaused = false;
+    private final DisposableSingleObserver<T> disposableSingleObserver;
+    private boolean subscribed = false;
+    @Nullable private Single<T> single;
 
-    RxTerminatingLifecycleObserver(@NonNull final LifecycleOwner lifecycleOwner) {
+    RxTerminatingLifecycleObserver(@NonNull final LifecycleOwner lifecycleOwner, 
+                                       final DisposableSingleObserver<T> disposableSingleObserver) {
         this.lifecycleOwner = lifecycleOwner;
+        this.disposableSingleObserver = disposableSingleObserver;
         lifecycleOwner.getLifecycle().addObserver(this);
     }
 
@@ -36,41 +40,28 @@ public class RxTerminatingLifecycleObserver implements LifecycleObserver {
         handleCurrentLifecycleState();
     }
 
-    void setDisposable(Disposable disposable) {
-        this.disposable = disposable;
+    void setSingle(final Single<T> single) {
+        this.single = single;
         handleCurrentLifecycleState();
     }
 
     private void handleCurrentLifecycleState() {
         if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
-            // Should be destroyed
-            endStream();
-        } else if (!LifecycleUtil.isInActiveState(lifecycleOwner) && !streamIsPaused) {
-            // Should pause the stream as the LifecycleOwner isn't yet ready for it to emit items
-            pauseStream();
-        } else if (streamIsPaused) {
-            // Need to restart a stream if it was paused
-            continueStream();
+            endStreamAndCleanup();
+        } else if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && single != null) {
+            Log.i(TAG, "Subscribing to observer.");
+            single.subscribeWith(disposableSingleObserver);
+            subscribed = true;
         }
     }
 
-    private void endStream() {
+    private void endStreamAndCleanup() {
         Log.i(TAG, "LifecycleOwner is destroyed, disposing stream.");
-        if (disposable != null) {
-            disposable.dispose();
+        if (single != null) {
+            single.subscribe().dispose();
         }
         lifecycleOwner.getLifecycle().removeObserver(this);
         lifecycleOwner = null;  // No memory leaks please
-    }
-
-    private void pauseStream() {
-        Log.i(TAG, "LifecycleOwner isn't yet active, pausing stream.");
-        streamIsPaused = true;
-    }
-
-    private void continueStream() {
-        Log.i(TAG, "LifecycleOwner was inactive but is currently active, continuing stream.");
-        streamIsPaused = false;
     }
 
     /**
