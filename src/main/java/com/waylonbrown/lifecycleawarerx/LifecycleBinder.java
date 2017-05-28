@@ -30,23 +30,23 @@ public class LifecycleBinder {
 
     // NOTE: can also pass in DisposableSingleObserver
     // TODO: move these 4 into one method or no?
-    public static <T> SingleTransformer<T, T> bindToLifecycle(LifecycleOwner lifecycleOwner,
-                                                              SingleObserver<T> singleObserver) {
+    public static <T> SingleTransformer<T, T> bindLifecycle(LifecycleOwner lifecycleOwner,
+                                                            SingleObserver<T> singleObserver) {
         return new LifecycleTransformer<>(lifecycleOwner, new SingleWithObserver<>(singleObserver));
     }
 
-    public static <T> ObservableTransformer<T, T> bindToLifecycle(LifecycleOwner lifecycleOwner,
-                                                                  Observer<T> observer) {
+    public static <T> ObservableTransformer<T, T> bindLifecycle(LifecycleOwner lifecycleOwner,
+                                                                Observer<T> observer) {
         return new LifecycleTransformer<>(lifecycleOwner, new ObservableWithObserver<>(observer));
     }
 
-    public static <T> MaybeTransformer<T, T> bindToLifecycle(LifecycleOwner lifecycleOwner,
-                                                             MaybeObserver<T> observer) {
+    public static <T> MaybeTransformer<T, T> bindLifecycle(LifecycleOwner lifecycleOwner,
+                                                           MaybeObserver<T> observer) {
         return new LifecycleTransformer<>(lifecycleOwner, new MaybeWithObserver<>(observer));
     }
 
-    public static <T> CompletableTransformer bindToLifecycle(LifecycleOwner lifecycleOwner,
-                                                                   CompletableObserver observer) {
+    public static <T> CompletableTransformer bindLifecycle(LifecycleOwner lifecycleOwner,
+                                                           CompletableObserver observer) {
         return new LifecycleTransformer<>(lifecycleOwner, new CompletableWithObserver(observer));
     }
 }

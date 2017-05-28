@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
-import com.waylonbrown.lifecycleawarerx.reactivetypes.SingleWithObserver;
 
 import io.reactivex.Completable;
 import io.reactivex.CompletableSource;
@@ -19,7 +18,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
-import io.reactivex.SingleObserver;
 import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;

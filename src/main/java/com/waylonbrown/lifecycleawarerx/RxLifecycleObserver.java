@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
-import com.waylonbrown.lifecycleawarerx.reactivetypes.SingleWithObserver;
 import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
 
 import io.reactivex.disposables.Disposable;
