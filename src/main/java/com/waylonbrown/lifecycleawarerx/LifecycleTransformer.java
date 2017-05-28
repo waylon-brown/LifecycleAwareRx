@@ -4,7 +4,6 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
 
@@ -113,7 +112,6 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 		// Is null because the LifecycleOwner is in destroyed state
 		disposable.dispose();
 		baseReactiveType = null;
-		Log.i(TAG, "Disposed stream because it was already destroyed.");
 		return true;
 	}
 

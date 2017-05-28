@@ -28,7 +28,6 @@ public class LifecycleBinder {
         return new LifecycleTransformer(lifecycleOwner, null);
     }
 
-    // NOTE: can also pass in DisposableSingleObserver
     // TODO: move these 4 into one method or no?
     public static <T> SingleTransformer<T, T> bindLifecycle(LifecycleOwner lifecycleOwner,
                                                             SingleObserver<T> singleObserver) {

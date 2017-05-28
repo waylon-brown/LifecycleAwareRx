@@ -6,7 +6,6 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
 import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
@@ -14,8 +13,6 @@ import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
 import io.reactivex.disposables.Disposable;
 
 public class RxLifecycleObserver<R, O> implements LifecycleObserver {
-    private final String TAG = RxLifecycleObserver.class.getSimpleName();
-
     /**
      * Since we're holding a reference to the LifecycleOwner, it's important that we remove this reference as soon
      * as it reaches a destroyed state to prevent a memory leak. Not using @NonNull since it is to later be set to null.
@@ -37,7 +34,6 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
     @SuppressWarnings("unused")
     @OnLifecycleEvent(Lifecycle.Event.ON_ANY)
     void onStateChange() {
-        Log.i(TAG, "Lifecycle changed to " + lifecycleOwner.getLifecycle().getCurrentState().toString());
         handleCurrentLifecycleState();
     }
 
@@ -55,8 +51,6 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
         if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
             endStreamAndCleanup();
         } else if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && baseReactiveType != null) {
-            Log.i(TAG, "Subscribing to observer.");
-            
             // Subscribe to stream with observer since the LifecycleOwner is now active but wasn't previously
             baseReactiveType.subscribeWithObserver();
 
@@ -65,7 +59,6 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
     }
 
     private void endStreamAndCleanup() {
-        Log.i(TAG, "LifecycleOwner is destroyed, disposing stream.");
         if (disposable != null) {
             disposable.dispose();
         }
