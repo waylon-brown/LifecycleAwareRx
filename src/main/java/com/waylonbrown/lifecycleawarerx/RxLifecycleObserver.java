@@ -26,9 +26,6 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
      */
     private LifecycleOwner lifecycleOwner;
     
-    // Used for destroying the stream
-    @Nullable private Disposable disposable;
-    
     // Used for starting the stream once LifecycleOwner is active
     @Nullable private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
     private boolean subscribed = false;
@@ -44,36 +41,26 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
         handleCurrentLifecycleState();
     }
 
-    void setDisposable(Disposable disposable) {
-        this.disposable = disposable;
-        handleCurrentLifecycleState();
-    }
-
-    public void setBaseReactiveType(final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
+    void setBaseReactiveType(final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
         this.baseReactiveType = baseReactiveType;
         handleCurrentLifecycleState();
+    }
+    
+    // Remove LifecycleOwner reference
+    void cleanup() {
+        this.lifecycleOwner = null; // No memory leaks please
     }
 
     /**
      * Decides whether the stream needs to be destroyed or subscribed to.
      */
     private void handleCurrentLifecycleState() {
-        if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
-            endStreamAndCleanup();
-        } else if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && baseReactiveType != null) {
+        if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && baseReactiveType != null) {
             // Subscribe to stream with observer since the LifecycleOwner is now active but wasn't previously
             baseReactiveType.subscribeWithObserver();
 
             subscribed = true;
         }
-    }
-
-    private void endStreamAndCleanup() {
-        if (disposable != null) {
-            disposable.dispose();
-        }
-        lifecycleOwner.getLifecycle().removeObserver(this);
-        lifecycleOwner = null;  // No memory leaks please
     }
 
     /**

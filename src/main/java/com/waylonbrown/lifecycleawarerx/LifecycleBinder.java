@@ -1,5 +1,6 @@
 package com.waylonbrown.lifecycleawarerx;
 
+import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 
 import com.waylonbrown.lifecycleawarerx.reactivetypes.CompletableWithObserver;
@@ -7,14 +8,19 @@ import com.waylonbrown.lifecycleawarerx.reactivetypes.MaybeWithObserver;
 import com.waylonbrown.lifecycleawarerx.reactivetypes.ObservableWithObserver;
 import com.waylonbrown.lifecycleawarerx.reactivetypes.SingleWithObserver;
 
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.CompletableObserver;
 import io.reactivex.CompletableTransformer;
 import io.reactivex.MaybeObserver;
 import io.reactivex.MaybeTransformer;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.Observer;
+import io.reactivex.Scheduler;
 import io.reactivex.SingleObserver;
 import io.reactivex.SingleTransformer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Predicate;
 
 /**
  * Contains the methods to be statically called within your RxJava2 stream using compose().
@@ -31,10 +37,15 @@ public class LifecycleBinder {
      *      library Activity and Fragment.
      * @return the transformer to be used in compose() of your stream.
      */
-    public static LifecycleTransformer disposeOnDestroy(LifecycleOwner lifecycleOwner) {
+    public static LifecycleTransformer disposeIfDestroyed(LifecycleOwner lifecycleOwner) {
         return new LifecycleTransformer(lifecycleOwner, null);
     }
 
+    //TODO: move this into transformer so all done with compose
+//    public static Predicate disposeIfDestroyed(LifecycleOwner lifecycleOwner) {
+//        return new LifecyclePredicate(lifecycleOwner);
+//    }
+    
     /**
      * Each of the bindLifecycle() methods take care of subscribing to the observer only once your lifecycle is 
      * actually active, thereby ensuring your views are only accessed once they are ready, as well as disposing of the 

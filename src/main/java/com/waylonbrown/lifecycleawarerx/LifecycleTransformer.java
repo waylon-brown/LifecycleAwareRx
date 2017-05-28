@@ -7,6 +7,9 @@ import android.support.annotation.Nullable;
 
 import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
 
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import io.reactivex.Completable;
 import io.reactivex.CompletableSource;
 import io.reactivex.CompletableTransformer;
@@ -33,27 +36,28 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 		MaybeTransformer<T, T>,
 		CompletableTransformer {
 
-	private final String TAG = LifecycleTransformer.class.getSimpleName();
-
+	@NonNull
+	private LifecycleOwner lifecycleOwner;
 	@Nullable
 	private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
-
 	@Nullable
 	private RxLifecycleObserver<R, O> lifecycleObserver;
 
 	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner,
 						 @Nullable final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
-		if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
-			return;
+		this.lifecycleOwner = lifecycleOwner;
+		// We're also handling delaying subscription until the LifecycleOwner is active
+		if (baseReactiveType != null) {
+			this.baseReactiveType = baseReactiveType;
+			this.lifecycleObserver = new RxLifecycleObserver<>(lifecycleOwner);
 		}
-		this.baseReactiveType = baseReactiveType;
-		this.lifecycleObserver = new RxLifecycleObserver<>(lifecycleOwner);
 	}
 
 	@Override
 	public ObservableSource<T> apply(final Observable<T> upstream) {
-		if (!setDisposableAndReturnIfDisposed(upstream.subscribe())
-			&& lifecycleObserver != null
+		upstream.takeWhile(new LifecyclePredicate(this, this.lifecycleOwner));
+		
+		if (lifecycleObserver != null
 			&& baseReactiveType != null) {
 
 			// Replay emitted values to late subscriber
@@ -65,10 +69,31 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 
 	@Override
 	public SingleSource<T> apply(Single<T> upstream) {
-		if(!setDisposableAndReturnIfDisposed(upstream.subscribe())
-			&& lifecycleObserver != null
+		upstream.filter(new LifecyclePredicate(this, this.lifecycleOwner));
+		
+		if(lifecycleObserver != null
 			&& baseReactiveType != null) {
 
+//			LifecyclePublisher lifecyclePublisher = new LifecyclePublisher(this, this.lifecycleOwner);
+//			lifecyclePublisher.subscribe(new Subscriber() {
+//				@Override
+//				public void onSubscribe(final Subscription s) {
+//				}
+//
+//				@Override
+//				public void onNext(final Object o) {
+//				}
+//
+//				@Override
+//				public void onError(final Throwable t) {
+//				}
+//
+//				@Override
+//				public void onComplete() {
+//				}
+//			});
+//			upstream.takeUntil(lifecyclePublisher);
+			
 			// Replay emitted values to late subscriber
 			upstream.cache();
 			setReactiveType((R)upstream);
@@ -78,8 +103,9 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 
 	@Override
 	public MaybeSource<T> apply(Maybe<T> upstream) {
-		if (!setDisposableAndReturnIfDisposed(upstream.subscribe())
-			&& lifecycleObserver != null
+		upstream.filter(new LifecyclePredicate(this, this.lifecycleOwner));
+		
+		if (lifecycleObserver != null
 			&& baseReactiveType != null) {
 
 			// Replay emitted values to late subscriber
@@ -91,9 +117,10 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 
 	@Override
 	public CompletableSource apply(Completable upstream) {
-		if (!setDisposableAndReturnIfDisposed(upstream.subscribe())
-			&& lifecycleObserver != null
+		if (lifecycleObserver != null
 			&& baseReactiveType != null) {
+			
+//			upstream.?
 			
 			// Can't cache a Completable
 			setReactiveType((R)upstream);
@@ -101,19 +128,11 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 		return upstream;
 	}
 
-	/**
-	 * @param disposable
-	 * @return true if the disposable was disposed because LifecycleOwner is already destroyed.
-	 */
-	private boolean setDisposableAndReturnIfDisposed(Disposable disposable) {
-		if (this.lifecycleObserver != null) {
-			this.lifecycleObserver.setDisposable(disposable);
-			return false;
+	void cleanup() {
+		lifecycleOwner = null;
+		if (lifecycleObserver != null) {
+			lifecycleObserver.cleanup();
 		}
-		// Is null because the LifecycleOwner is in destroyed state
-		disposable.dispose();
-		baseReactiveType = null;
-		return true;
 	}
 
 	private void setReactiveType(final R upstream) {
