@@ -12,6 +12,13 @@ import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
 
 import io.reactivex.disposables.Disposable;
 
+/**
+ * Observes state changes that happen to the {@link LifecycleOwner}, and destroys the stream once the lifecycle owner's
+ * state is DESTROYED, as well as optionally delays subscription until the lifecycle is active.
+ * 
+ * @param <R>
+ * @param <O>
+ */
 public class RxLifecycleObserver<R, O> implements LifecycleObserver {
     /**
      * Since we're holding a reference to the LifecycleOwner, it's important that we remove this reference as soon
@@ -47,6 +54,9 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
         handleCurrentLifecycleState();
     }
 
+    /**
+     * Decides whether the stream needs to be destroyed or subscribed to.
+     */
     private void handleCurrentLifecycleState() {
         if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
             endStreamAndCleanup();

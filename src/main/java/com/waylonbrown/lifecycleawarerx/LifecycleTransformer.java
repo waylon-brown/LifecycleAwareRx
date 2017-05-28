@@ -22,8 +22,9 @@ import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
 
 /**
+ * Transformer that is used by the compose() method of your stream.
  * 
- * @param <T> stream inner type
+ * @param <T> stream inner type (what you want returned in your subscription)
  * @param <R> reactive type
  * @param <O> observer type
  */
