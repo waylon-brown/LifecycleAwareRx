@@ -92,12 +92,17 @@ public class LifecycleTest {
 		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(true, methodOnViewCalled);
 	}
+
+	/**
+	 * Ending stream on LifecycleOwner's destroy
+	 */
 	
 	@Test
 	public void viewsAreNotCalledWhenLifecycleDestroyedWithObservable() throws Exception {
 		Observable<Long> observable = Observable.interval(1, TimeUnit.MILLISECONDS);
 
-		observable.takeWhile(LifecycleBinder.notDestroyed(lifecycleOwner))
+		observable
+			.takeWhile(LifecycleBinder.notDestroyed(lifecycleOwner))
 			.subscribeWith(new DisposableObserver() {
 				@Override
 				public void onNext(final Object value) {
@@ -133,83 +138,83 @@ public class LifecycleTest {
 		assertEquals(false, onErrorCalled);
 	}
 
-	@Test
-	public void viewsAreNotCalledWhenLifecycleDestroyedWithSingle() throws Exception {
-		Single<String> single = Single.just("test");
-		
-		single.filter(LifecycleBinder.notDestroyed(lifecycleOwner))
-			.subscribeWith(new DisposableMaybeObserver() {
-				@Override
-				public void onSuccess(final Object value) {
-					LifecycleTest.this.methodOnViewCalled = true;
-				}
-
-				@Override
-				public void onError(final Throwable e) {
-					LifecycleTest.this.onErrorCalled = true;
-				}
-
-				@Override
-				public void onComplete() {
-					LifecycleTest.this.onCompleteCalled = true;
-				}
-			});
-
-		TimeUnit.MILLISECONDS.sleep(100);
-		assertEquals(true, methodOnViewCalled);
-
-		lifecycleOwner.setState(Lifecycle.State.DESTROYED);
-		methodOnViewCalled = false;	// Make sure there's a fresh state just as LifecycleOwner hits destroy
-		onCompleteCalled = false;
-		onErrorCalled = false;
-
-		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(100);
-		assertEquals(false, methodOnViewCalled);
-		// Adding these just to show what you can expect, onComplete() is not called with Singles since the single 
-		// item that is emitted is filtered out without completing the stream.
-		assertEquals(false, onCompleteCalled);
-		assertEquals(false, onErrorCalled);
-	}
-
-	@Test
-	public void viewsAreNotCalledWhenLifecycleDestroyedWithMaybe() throws Exception {
-		Maybe<String> maybe = Maybe.just("test");
-
-		maybe.filter(LifecycleBinder.notDestroyed(lifecycleOwner))
-			.subscribeWith(new DisposableMaybeObserver() {
-				@Override
-				public void onSuccess(final Object value) {
-					LifecycleTest.this.methodOnViewCalled = true;
-				}
-
-				@Override
-				public void onError(final Throwable e) {
-					LifecycleTest.this.onErrorCalled = true;
-				}
-
-				@Override
-				public void onComplete() {
-					LifecycleTest.this.onCompleteCalled = true;
-				}
-			});
-
-		TimeUnit.MILLISECONDS.sleep(100);
-		assertEquals(true, methodOnViewCalled);
-
-		lifecycleOwner.setState(Lifecycle.State.DESTROYED);
-		methodOnViewCalled = false;	// Make sure there's a fresh state just as LifecycleOwner hits destroy
-		onCompleteCalled = false;
-		onErrorCalled = false;
-
-		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(100);
-		assertEquals(false, methodOnViewCalled);
-		// Adding these just to show what you can expect, onComplete() is not called with Maybes since the single 
-		// item that is emitted is filtered out without completing the stream.
-		assertEquals(false, onCompleteCalled);
-		assertEquals(false, onErrorCalled);
-	}
+//	@Test
+//	public void viewsAreNotCalledWhenLifecycleDestroyedWithSingle() throws Exception {
+//		Single<String> single = Single.just("test");
+//		
+//		single.filter(LifecycleBinder.notDestroyed(lifecycleOwner))
+//			.subscribeWith(new DisposableMaybeObserver() {
+//				@Override
+//				public void onSuccess(final Object value) {
+//					LifecycleTest.this.methodOnViewCalled = true;
+//				}
+//
+//				@Override
+//				public void onError(final Throwable e) {
+//					LifecycleTest.this.onErrorCalled = true;
+//				}
+//
+//				@Override
+//				public void onComplete() {
+//					LifecycleTest.this.onCompleteCalled = true;
+//				}
+//			});
+//
+//		TimeUnit.MILLISECONDS.sleep(100);
+//		assertEquals(true, methodOnViewCalled);
+//
+//		lifecycleOwner.setState(Lifecycle.State.DESTROYED);
+//		methodOnViewCalled = false;	// Make sure there's a fresh state just as LifecycleOwner hits destroy
+//		onCompleteCalled = false;
+//		onErrorCalled = false;
+//
+//		// Need to wait to give it time to potentially fail
+//		TimeUnit.MILLISECONDS.sleep(100);
+//		assertEquals(false, methodOnViewCalled);
+//		// Adding these just to show what you can expect, onComplete() is not called with Singles since the single 
+//		// item that is emitted is filtered out without completing the stream.
+//		assertEquals(false, onCompleteCalled);
+//		assertEquals(false, onErrorCalled);
+//	}
+//
+//	@Test
+//	public void viewsAreNotCalledWhenLifecycleDestroyedWithMaybe() throws Exception {
+//		Maybe<String> maybe = Maybe.just("test");
+//
+//		maybe.filter(LifecycleBinder.notDestroyed(lifecycleOwner))
+//			.subscribeWith(new DisposableMaybeObserver() {
+//				@Override
+//				public void onSuccess(final Object value) {
+//					LifecycleTest.this.methodOnViewCalled = true;
+//				}
+//
+//				@Override
+//				public void onError(final Throwable e) {
+//					LifecycleTest.this.onErrorCalled = true;
+//				}
+//
+//				@Override
+//				public void onComplete() {
+//					LifecycleTest.this.onCompleteCalled = true;
+//				}
+//			});
+//
+//		TimeUnit.MILLISECONDS.sleep(100);
+//		assertEquals(true, methodOnViewCalled);
+//
+//		lifecycleOwner.setState(Lifecycle.State.DESTROYED);
+//		methodOnViewCalled = false;	// Make sure there's a fresh state just as LifecycleOwner hits destroy
+//		onCompleteCalled = false;
+//		onErrorCalled = false;
+//
+//		// Need to wait to give it time to potentially fail
+//		TimeUnit.MILLISECONDS.sleep(100);
+//		assertEquals(false, methodOnViewCalled);
+//		// Adding these just to show what you can expect, onComplete() is not called with Maybes since the single 
+//		// item that is emitted is filtered out without completing the stream.
+//		assertEquals(false, onCompleteCalled);
+//		assertEquals(false, onErrorCalled);
+//	}
 
 	@Test
 	public void viewsAreOnlyCalledWhenLifecycleActiveWithObservable() throws Exception {

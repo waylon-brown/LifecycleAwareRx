@@ -29,16 +29,4 @@ public class SingleWithObserver<T> implements BaseReactiveTypeWithObserver<Singl
     public void setReactiveType(Single<T> single) {
         this.single = single;
     }
-
-    @NonNull
-    @Override
-    public Single<T> getReactiveType() {
-        return single;
-    }
-
-    @NonNull
-    @Override
-    public SingleObserver<T> getObserver() {
-        return observer;
-    }
 }

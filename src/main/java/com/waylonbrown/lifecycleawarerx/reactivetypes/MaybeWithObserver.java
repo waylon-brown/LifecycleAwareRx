@@ -29,16 +29,4 @@ public class MaybeWithObserver<T> implements BaseReactiveTypeWithObserver<Maybe<
     public void setReactiveType(Maybe<T> maybe) {
         this.maybe = maybe;
     }
-
-    @NonNull
-    @Override
-    public Maybe<T> getReactiveType() {
-        return maybe;
-    }
-
-    @NonNull
-    @Override
-    public MaybeObserver<T> getObserver() {
-        return observer;
-    }
 }

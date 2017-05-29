@@ -20,7 +20,8 @@ import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 
 /**
- * Transformer that is used by the compose() method of your stream.
+ * Transformer that is used by the compose() method of your stream to cache emitted items and subscribe to them once 
+ * the {@link LifecycleOwner} is active.
  * 
  * @param <T> stream inner type (what you want returned in your subscription)
  * @param <R> reactive type
@@ -28,67 +29,43 @@ import io.reactivex.SingleTransformer;
  */
 public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T>,
 		SingleTransformer<T, T>,
-		MaybeTransformer<T, T>,
-		CompletableTransformer {
+		MaybeTransformer<T, T> {
 
-	@Nullable
+	@NonNull
 	private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
-	@Nullable
+	@NonNull
 	private RxLifecycleObserver<R, O> lifecycleObserver;
 
 	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner,
-						 @Nullable final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
-		// We're also handling delaying subscription until the LifecycleOwner is active
-		if (baseReactiveType != null) {
-			this.baseReactiveType = baseReactiveType;
-			this.lifecycleObserver = new RxLifecycleObserver<>(lifecycleOwner);
-		}
+						 @NonNull final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
+		this.baseReactiveType = baseReactiveType;
+		this.lifecycleObserver = new RxLifecycleObserver<>(lifecycleOwner);
 	}
 
 	@Override
 	public ObservableSource<T> apply(final Observable<T> upstream) {
-		if (lifecycleObserver != null
-			&& baseReactiveType != null) {
-
-			// Replay emitted values to late subscriber
-			upstream.cache();
-			setReactiveType((R)upstream);
-		}
+		// Replay emitted values to late subscriber
+		upstream.cache();
+		setReactiveType((R)upstream);
+		
 		return upstream;
 	}
 
 	@Override
 	public SingleSource<T> apply(Single<T> upstream) {
-		if(lifecycleObserver != null
-			&& baseReactiveType != null) {
-			
-			// Replay emitted values to late subscriber
-			upstream.cache();
-			setReactiveType((R)upstream);
-		}
+		// Replay emitted values to late subscriber
+		upstream.cache();
+		setReactiveType((R)upstream);
+		
 		return upstream;
 	}
 
 	@Override
 	public MaybeSource<T> apply(Maybe<T> upstream) {
-		if (lifecycleObserver != null
-			&& baseReactiveType != null) {
-
-			// Replay emitted values to late subscriber
-			upstream.cache();
-			setReactiveType((R)upstream);
-		}
-		return upstream;
-	}
-
-	@Override
-	public CompletableSource apply(Completable upstream) {
-		if (lifecycleObserver != null
-			&& baseReactiveType != null) {
-			
-			// Can't cache a Completable
-			setReactiveType((R)upstream);
-		}
+		// Replay emitted values to late subscriber
+		upstream.cache();
+		setReactiveType((R)upstream);
+		
 		return upstream;
 	}
 

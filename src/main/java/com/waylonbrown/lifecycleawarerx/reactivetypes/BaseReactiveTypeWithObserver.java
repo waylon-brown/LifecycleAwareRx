@@ -6,10 +6,6 @@ package com.waylonbrown.lifecycleawarerx.reactivetypes;
  */
 public interface BaseReactiveTypeWithObserver<R, O> {
     
-    R getReactiveType();
-    
-    O getObserver();
-    
     void setReactiveType(R reactiveType);
     
     void subscribeWithObserver();

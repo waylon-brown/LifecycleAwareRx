@@ -29,16 +29,4 @@ public class ObservableWithObserver<T> implements BaseReactiveTypeWithObserver<O
     public void setReactiveType(Observable<T> observable) {
         this.observable = observable;
     }
-
-    @NonNull
-    @Override
-    public Observable<T> getReactiveType() {
-        return observable;
-    }
-
-    @NonNull
-    @Override
-    public Observer<T> getObserver() {
-        return observer;
-    }
 }

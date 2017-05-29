@@ -11,8 +11,8 @@ import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserv
 import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
 
 /**
- * Observes state changes that happen to the {@link LifecycleOwner}, and destroys the stream once the lifecycle owner's
- * state is DESTROYED, as well as optionally delays subscription until the lifecycle is active.
+ * Observes state changes that happen to the {@link LifecycleOwner}, and subscribes to the stream once the lifecycle is 
+ * active.
  * 
  * @param <R>
  * @param <O>
@@ -22,10 +22,11 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
      * Since we're holding a reference to the LifecycleOwner, it's important that we remove this reference as soon
      * as it reaches a destroyed state to prevent a memory leak. Not using @NonNull since it is to later be set to null.
      */
+    @Nullable // Since it's later set to null
     private LifecycleOwner lifecycleOwner;
     
-    // Used for starting the stream once LifecycleOwner is active
-    @Nullable private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
+    @Nullable
+    private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
     private boolean subscribed = false;
 
     RxLifecycleObserver(@NonNull final LifecycleOwner lifecycleOwner) {
@@ -48,10 +49,15 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
      * Decides whether the stream needs to be destroyed or subscribed to.
      */
     private void handleCurrentLifecycleState() {
-        if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
+        if (lifecycleOwner != null &&
+            lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
+            
             this.lifecycleOwner = null; // No memory leaks please
             this.baseReactiveType = null;
-        } else if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && baseReactiveType != null) {
+        } else if (LifecycleUtil.isInActiveState(lifecycleOwner) 
+            && !subscribed 
+            && baseReactiveType != null) {
+            
             // Subscribe to stream with observer since the LifecycleOwner is now active but wasn't previously
             baseReactiveType.subscribeWithObserver();
 

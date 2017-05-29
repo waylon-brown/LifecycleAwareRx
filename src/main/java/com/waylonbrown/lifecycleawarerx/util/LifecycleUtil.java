@@ -2,6 +2,7 @@ package com.waylonbrown.lifecycleawarerx.util;
 
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
+import android.support.annotation.Nullable;
 
 public final class LifecycleUtil {
     
@@ -14,7 +15,10 @@ public final class LifecycleUtil {
      * @param lifecycleOwner
      * @return
      */
-    public static boolean isInActiveState(LifecycleOwner lifecycleOwner) {
+    public static boolean isInActiveState(@Nullable LifecycleOwner lifecycleOwner) {
+        if (lifecycleOwner == null) {
+            return false;
+        }
         return lifecycleOwner.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
     }
 }
