@@ -62,7 +62,7 @@ public class LifecycleTest {
 		methodOnViewCalled = false;	// Make sure there's a fresh state just as LifecycleOwner hits destroy
 
 		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(true, methodOnViewCalled);
 	}
 
@@ -89,7 +89,7 @@ public class LifecycleTest {
 		});
 
 		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(true, methodOnViewCalled);
 	}
 	
@@ -124,7 +124,7 @@ public class LifecycleTest {
 		onErrorCalled = false;
 
 		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(false, methodOnViewCalled);
 		// Adding these just to show what you can expect, onComplete() is called once stream ends so make sure you 
 		// don't access views in onComplete(). You can also use filter() instead of takeWhile if you don't want 
@@ -165,7 +165,7 @@ public class LifecycleTest {
 		onErrorCalled = false;
 
 		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(false, methodOnViewCalled);
 		// Adding these just to show what you can expect, onComplete() is not called with Singles since the single 
 		// item that is emitted is filtered out without completing the stream.
@@ -204,7 +204,7 @@ public class LifecycleTest {
 		onErrorCalled = false;
 
 		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(false, methodOnViewCalled);
 		// Adding these just to show what you can expect, onComplete() is not called with Maybes since the single 
 		// item that is emitted is filtered out without completing the stream.
@@ -219,7 +219,7 @@ public class LifecycleTest {
 
 		lifecycleOwner.setState(Lifecycle.State.INITIALIZED);
 
-		observable.compose(LifecycleBinder.bindLifecycle(lifecycleOwner, new DisposableObserver() {
+		observable.compose(LifecycleBinder.subscribeWhenReady(lifecycleOwner, new DisposableObserver() {
 			@Override
 			public void onNext(final Object value) {
 				LifecycleTest.this.methodOnViewCalledCounter++;
@@ -235,15 +235,15 @@ public class LifecycleTest {
 		}));
 
 		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(0, methodOnViewCalledCounter);
 
 		lifecycleOwner.setState(Lifecycle.State.CREATED);
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(0, methodOnViewCalledCounter);
 
 		lifecycleOwner.setState(Lifecycle.State.STARTED);
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		// At this point the views should now be called since the lifecycle is active
 		assertEquals(10, methodOnViewCalledCounter);
 	}
@@ -254,7 +254,7 @@ public class LifecycleTest {
 
 		lifecycleOwner.setState(Lifecycle.State.INITIALIZED);
 
-		single.compose(LifecycleBinder.bindLifecycle(lifecycleOwner, new DisposableSingleObserver<String>() {
+		single.compose(LifecycleBinder.subscribeWhenReady(lifecycleOwner, new DisposableSingleObserver<String>() {
 			@Override
 			public void onSuccess(final String value) {
 				LifecycleTest.this.methodOnViewCalled = true;
@@ -266,15 +266,15 @@ public class LifecycleTest {
 		}));
 
 		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(false, methodOnViewCalled);
 
 		lifecycleOwner.setState(Lifecycle.State.CREATED);
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(false, methodOnViewCalled);
 
 		lifecycleOwner.setState(Lifecycle.State.STARTED);
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		// At this point the views should now be called since the lifecycle is active
 		assertEquals(true, methodOnViewCalled);
 	}
@@ -285,7 +285,7 @@ public class LifecycleTest {
 
 		lifecycleOwner.setState(Lifecycle.State.INITIALIZED);
 
-		maybe.compose(LifecycleBinder.bindLifecycle(lifecycleOwner, new DisposableMaybeObserver<String>() {
+		maybe.compose(LifecycleBinder.subscribeWhenReady(lifecycleOwner, new DisposableMaybeObserver<String>() {
 			@Override
 			public void onSuccess(final String value) {
 				LifecycleTest.this.methodOnViewCalled = true;
@@ -301,15 +301,15 @@ public class LifecycleTest {
 		}));
 
 		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(false, methodOnViewCalled);
 
 		lifecycleOwner.setState(Lifecycle.State.CREATED);
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(false, methodOnViewCalled);
 
 		lifecycleOwner.setState(Lifecycle.State.STARTED);
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		// At this point the views should now be called since the lifecycle is active
 		assertEquals(true, methodOnViewCalled);
 	}
@@ -323,7 +323,7 @@ public class LifecycleTest {
 
 		final Long[] lastValue = {-1L};
 		observable.takeLast(1)
-			.compose(LifecycleBinder.bindLifecycle(lifecycleOwner, new DisposableObserver<Long>() {
+			.compose(LifecycleBinder.subscribeWhenReady(lifecycleOwner, new DisposableObserver<Long>() {
 				@Override
 				public void onNext(final Long value) {
 					LifecycleTest.this.methodOnViewCalledCounter++;
@@ -340,15 +340,15 @@ public class LifecycleTest {
 			}));
 
 		// Need to wait to give it time to potentially fail
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(0, methodOnViewCalledCounter);
 
 		lifecycleOwner.setState(Lifecycle.State.CREATED);
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(0, methodOnViewCalledCounter);
 
 		lifecycleOwner.setState(Lifecycle.State.STARTED);
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(100);
 		// At this point the views should now be called since the lifecycle is active
 		assertEquals(1, methodOnViewCalledCounter);
 		// Make sure it's the last item emitted, not the first
