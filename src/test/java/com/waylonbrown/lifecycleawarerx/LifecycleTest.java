@@ -304,6 +304,47 @@ public class LifecycleTest {
 		// At this point the views should now be called since the lifecycle is active
 		assertEquals(true, methodOnViewCalled);
 	}
+
+	@Test
+	public void onlyLastItemEmittedOnceLifecycleActiveWithObservable() throws Exception {
+		Observable<Long> observable = Observable.interval(1, TimeUnit.MILLISECONDS)
+			.take(10);
+
+		lifecycleOwner.setState(Lifecycle.State.INITIALIZED);
+
+		final Long[] lastValue = {-1L};
+		observable.takeLast(1)
+			.compose(LifecycleBinder.bindLifecycle(lifecycleOwner, new DisposableObserver<Long>() {
+				@Override
+				public void onNext(final Long value) {
+					LifecycleTest.this.methodOnViewCalledCounter++;
+					lastValue[0] = value;
+				}
+	
+				@Override
+				public void onError(final Throwable e) {
+				}
+	
+				@Override
+				public void onComplete() {
+				}
+			}));
+
+		// Need to wait to give it time to potentially fail
+		TimeUnit.MILLISECONDS.sleep(500);
+		assertEquals(0, methodOnViewCalledCounter);
+
+		lifecycleOwner.setState(Lifecycle.State.CREATED);
+		TimeUnit.MILLISECONDS.sleep(500);
+		assertEquals(0, methodOnViewCalledCounter);
+
+		lifecycleOwner.setState(Lifecycle.State.STARTED);
+		TimeUnit.MILLISECONDS.sleep(500);
+		// At this point the views should now be called since the lifecycle is active
+		assertEquals(1, methodOnViewCalledCounter);
+		// Make sure it's the last item emitted, not the first
+		assertEquals(9L, lastValue[0].longValue());
+	}
 	
 	private static class TestLifecycle extends Lifecycle {
 		
