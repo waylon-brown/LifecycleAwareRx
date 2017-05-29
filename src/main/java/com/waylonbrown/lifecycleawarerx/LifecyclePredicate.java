@@ -2,17 +2,15 @@ package com.waylonbrown.lifecycleawarerx;
 
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
+import android.support.annotation.NonNull;
 
 import io.reactivex.functions.Predicate;
 
 public class LifecyclePredicate implements Predicate {
 
-    private final LifecycleTransformer lifecycleTransformer;
     private LifecycleOwner lifecycleOwner;
 
-    LifecyclePredicate(final LifecycleTransformer lifecycleTransformer, 
-                       LifecycleOwner lifecycleOwner) {
-        this.lifecycleTransformer = lifecycleTransformer;
+    LifecyclePredicate(@NonNull LifecycleOwner lifecycleOwner) {
         this.lifecycleOwner = lifecycleOwner;
     }
 
@@ -22,7 +20,6 @@ public class LifecyclePredicate implements Predicate {
         if (isDestroyed) {
             // No memory leaks please
             this.lifecycleOwner = null;
-            this.lifecycleTransformer.cleanup();
         }
         // If not destroyed, predicate is true and emits streams items as normal. Otherwise it ends.
         return !isDestroyed;

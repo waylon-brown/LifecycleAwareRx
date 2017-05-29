@@ -37,14 +37,9 @@ public class LifecycleBinder {
      *      library Activity and Fragment.
      * @return the transformer to be used in compose() of your stream.
      */
-    public static LifecycleTransformer disposeIfDestroyed(LifecycleOwner lifecycleOwner) {
-        return new LifecycleTransformer(lifecycleOwner, null);
+    public static LifecyclePredicate notDestroyed(LifecycleOwner lifecycleOwner) {
+        return new LifecyclePredicate(lifecycleOwner);
     }
-
-    //TODO: move this into transformer so all done with compose
-//    public static Predicate disposeIfDestroyed(LifecycleOwner lifecycleOwner) {
-//        return new LifecyclePredicate(lifecycleOwner);
-//    }
     
     /**
      * Each of the bindLifecycle() methods take care of subscribing to the observer only once your lifecycle is 

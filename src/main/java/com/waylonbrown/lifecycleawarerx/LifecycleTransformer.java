@@ -1,14 +1,10 @@
 package com.waylonbrown.lifecycleawarerx;
 
-import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
-
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.reactivex.Completable;
 import io.reactivex.CompletableSource;
@@ -22,7 +18,6 @@ import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
-import io.reactivex.disposables.Disposable;
 
 /**
  * Transformer that is used by the compose() method of your stream.
@@ -36,8 +31,6 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 		MaybeTransformer<T, T>,
 		CompletableTransformer {
 
-	@NonNull
-	private LifecycleOwner lifecycleOwner;
 	@Nullable
 	private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
 	@Nullable
@@ -45,7 +38,6 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 
 	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner,
 						 @Nullable final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {
-		this.lifecycleOwner = lifecycleOwner;
 		// We're also handling delaying subscription until the LifecycleOwner is active
 		if (baseReactiveType != null) {
 			this.baseReactiveType = baseReactiveType;
@@ -55,8 +47,6 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 
 	@Override
 	public ObservableSource<T> apply(final Observable<T> upstream) {
-		upstream.takeWhile(new LifecyclePredicate(this, this.lifecycleOwner));
-		
 		if (lifecycleObserver != null
 			&& baseReactiveType != null) {
 
@@ -69,30 +59,8 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 
 	@Override
 	public SingleSource<T> apply(Single<T> upstream) {
-		upstream.filter(new LifecyclePredicate(this, this.lifecycleOwner));
-		
 		if(lifecycleObserver != null
 			&& baseReactiveType != null) {
-
-//			LifecyclePublisher lifecyclePublisher = new LifecyclePublisher(this, this.lifecycleOwner);
-//			lifecyclePublisher.subscribe(new Subscriber() {
-//				@Override
-//				public void onSubscribe(final Subscription s) {
-//				}
-//
-//				@Override
-//				public void onNext(final Object o) {
-//				}
-//
-//				@Override
-//				public void onError(final Throwable t) {
-//				}
-//
-//				@Override
-//				public void onComplete() {
-//				}
-//			});
-//			upstream.takeUntil(lifecyclePublisher);
 			
 			// Replay emitted values to late subscriber
 			upstream.cache();
@@ -103,8 +71,6 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 
 	@Override
 	public MaybeSource<T> apply(Maybe<T> upstream) {
-		upstream.filter(new LifecyclePredicate(this, this.lifecycleOwner));
-		
 		if (lifecycleObserver != null
 			&& baseReactiveType != null) {
 
@@ -120,19 +86,10 @@ public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T
 		if (lifecycleObserver != null
 			&& baseReactiveType != null) {
 			
-//			upstream.?
-			
 			// Can't cache a Completable
 			setReactiveType((R)upstream);
 		}
 		return upstream;
-	}
-
-	void cleanup() {
-		lifecycleOwner = null;
-		if (lifecycleObserver != null) {
-			lifecycleObserver.cleanup();
-		}
 	}
 
 	private void setReactiveType(final R upstream) {

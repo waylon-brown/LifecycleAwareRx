@@ -10,8 +10,6 @@ import android.support.annotation.Nullable;
 import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
 import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
 
-import io.reactivex.disposables.Disposable;
-
 /**
  * Observes state changes that happen to the {@link LifecycleOwner}, and destroys the stream once the lifecycle owner's
  * state is DESTROYED, as well as optionally delays subscription until the lifecycle is active.
@@ -46,16 +44,14 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
         handleCurrentLifecycleState();
     }
     
-    // Remove LifecycleOwner reference
-    void cleanup() {
-        this.lifecycleOwner = null; // No memory leaks please
-    }
-
     /**
      * Decides whether the stream needs to be destroyed or subscribed to.
      */
     private void handleCurrentLifecycleState() {
-        if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && baseReactiveType != null) {
+        if (lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
+            this.lifecycleOwner = null; // No memory leaks please
+            this.baseReactiveType = null;
+        } else if (LifecycleUtil.isInActiveState(lifecycleOwner) && !subscribed && baseReactiveType != null) {
             // Subscribe to stream with observer since the LifecycleOwner is now active but wasn't previously
             baseReactiveType.subscribeWithObserver();
 
