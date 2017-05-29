@@ -114,7 +114,6 @@ public class LifecycleTest {
 					LifecycleTest.this.onCompleteCalled = true;
 				}
 			});
-
 		TimeUnit.MILLISECONDS.sleep(100);
 		assertEquals(true, methodOnViewCalled);
 
