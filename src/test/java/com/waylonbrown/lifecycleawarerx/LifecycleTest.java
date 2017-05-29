@@ -115,6 +115,9 @@ public class LifecycleTest {
 				}
 			});
 
+		TimeUnit.MILLISECONDS.sleep(100);
+		assertEquals(true, methodOnViewCalled);
+
 		lifecycleOwner.setState(Lifecycle.State.DESTROYED);
 		methodOnViewCalled = false;	// Make sure there's a fresh state just as LifecycleOwner hits destroy
 		onCompleteCalled = false;
@@ -153,6 +156,9 @@ public class LifecycleTest {
 				}
 			});
 
+		TimeUnit.MILLISECONDS.sleep(100);
+		assertEquals(true, methodOnViewCalled);
+
 		lifecycleOwner.setState(Lifecycle.State.DESTROYED);
 		methodOnViewCalled = false;	// Make sure there's a fresh state just as LifecycleOwner hits destroy
 		onCompleteCalled = false;
@@ -188,6 +194,9 @@ public class LifecycleTest {
 					LifecycleTest.this.onCompleteCalled = true;
 				}
 			});
+
+		TimeUnit.MILLISECONDS.sleep(100);
+		assertEquals(true, methodOnViewCalled);
 
 		lifecycleOwner.setState(Lifecycle.State.DESTROYED);
 		methodOnViewCalled = false;	// Make sure there's a fresh state just as LifecycleOwner hits destroy
