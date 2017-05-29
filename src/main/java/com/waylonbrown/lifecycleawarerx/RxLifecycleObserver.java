@@ -51,8 +51,9 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
     private void handleCurrentLifecycleState() {
         if (lifecycleOwner != null &&
             lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
-            
-            this.lifecycleOwner = null; // No memory leaks please
+
+            // No memory leaks please
+            this.lifecycleOwner = null;
             this.baseReactiveType = null;
         } else if (LifecycleUtil.isInActiveState(lifecycleOwner) 
             && !subscribed 
