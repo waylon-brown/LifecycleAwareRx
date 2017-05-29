@@ -65,8 +65,8 @@ public class LifecycleBinder {
      *      library Activity and Fragment.
      * @return the Predicate to be used in filter() or takeWhile() of your stream.
      */
-    public static LifecyclePredicate notDestroyed(@NonNull LifecycleOwner lifecycleOwner) {
-        return new LifecyclePredicate(lifecycleOwner);
+    public static <T> LifecyclePredicate<T> notDestroyed(@NonNull LifecycleOwner lifecycleOwner) {
+        return new LifecyclePredicate<>(lifecycleOwner);
     }
     
     /**

@@ -12,13 +12,11 @@ public final class LifecycleUtil {
     /**
      * A {@link LifecycleOwner} is considered active if it is either STARTED or RESUMED.
      * 
-     * @param lifecycleOwner
-     * @return
+     * @param lifecycleOwner to check the state of.
+     * @return whether the lifecycleOwner is active.
      */
     public static boolean isInActiveState(@Nullable LifecycleOwner lifecycleOwner) {
-        if (lifecycleOwner == null) {
-            return false;
-        }
-        return lifecycleOwner.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
+        return lifecycleOwner != null
+            && lifecycleOwner.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
     }
 }

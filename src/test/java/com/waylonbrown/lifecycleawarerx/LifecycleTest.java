@@ -99,9 +99,9 @@ public class LifecycleTest {
 	public void viewsAreNotCalledWhenLifecycleDestroyedWithObservable() throws Exception {
 		Observable.interval(1, TimeUnit.MILLISECONDS)
 			.takeWhile(LifecycleBinder.notDestroyed(lifecycleOwner))
-			.subscribeWith(new DisposableObserver() {
+			.subscribeWith(new DisposableObserver<Long>() {
 				@Override
-				public void onNext(final Object value) {
+				public void onNext(final Long value) {
 					LifecycleTest.this.methodOnViewCalled = true;
 				}
 
@@ -139,9 +139,9 @@ public class LifecycleTest {
 	public void viewsAreNotCalledWhenLifecycleDestroyedWithSingle() throws Exception {
 		Single.just("test")
 			.filter(LifecycleBinder.notDestroyed(lifecycleOwner))
-			.subscribeWith(new DisposableMaybeObserver() {
+			.subscribeWith(new DisposableMaybeObserver<String>() {
 				@Override
-				public void onSuccess(final Object value) {
+				public void onSuccess(final String value) {
 					LifecycleTest.this.methodOnViewCalled = true;
 				}
 
@@ -177,9 +177,9 @@ public class LifecycleTest {
 	public void viewsAreNotCalledWhenLifecycleDestroyedWithMaybe() throws Exception {
 		Maybe.just("test")
 			.filter(LifecycleBinder.notDestroyed(lifecycleOwner))
-			.subscribeWith(new DisposableMaybeObserver() {
+			.subscribeWith(new DisposableMaybeObserver<String>() {
 				@Override
-				public void onSuccess(final Object value) {
+				public void onSuccess(final String value) {
 					LifecycleTest.this.methodOnViewCalled = true;
 				}
 

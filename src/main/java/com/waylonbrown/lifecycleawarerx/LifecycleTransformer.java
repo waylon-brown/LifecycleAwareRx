@@ -2,13 +2,9 @@ package com.waylonbrown.lifecycleawarerx;
 
 import android.arch.lifecycle.LifecycleOwner;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.waylonbrown.lifecycleawarerx.reactivetypes.BaseReactiveTypeWithObserver;
 
-import io.reactivex.Completable;
-import io.reactivex.CompletableSource;
-import io.reactivex.CompletableTransformer;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeSource;
 import io.reactivex.MaybeTransformer;
@@ -27,14 +23,14 @@ import io.reactivex.SingleTransformer;
  * @param <R> reactive type
  * @param <O> observer type
  */
-public class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T>,
+class LifecycleTransformer<T, R, O> implements ObservableTransformer<T, T>,
 		SingleTransformer<T, T>,
 		MaybeTransformer<T, T> {
 
 	@NonNull
-	private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
+	private final BaseReactiveTypeWithObserver<R, O> baseReactiveType;
 	@NonNull
-	private RxLifecycleObserver<R, O> lifecycleObserver;
+	private final RxLifecycleObserver<R, O> lifecycleObserver;
 
 	LifecycleTransformer(@NonNull final LifecycleOwner lifecycleOwner,
 						 @NonNull final BaseReactiveTypeWithObserver<R, O> baseReactiveType) {

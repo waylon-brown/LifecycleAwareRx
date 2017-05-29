@@ -9,11 +9,8 @@ import io.reactivex.functions.Predicate;
 
 /**
  * Decides whether to keep emitting items based on if the {@link LifecycleOwner} is destroyed or not.
- * 
- * Not using generics since we don't care about the object under test with this Predicate, just the 
- * {@link LifecycleOwner} state.
  */
-public class LifecyclePredicate implements Predicate {
+public class LifecyclePredicate<T> implements Predicate<T> {
 
     @Nullable
     private LifecycleOwner lifecycleOwner;
@@ -23,7 +20,7 @@ public class LifecyclePredicate implements Predicate {
     }
 
     @Override
-    public boolean test(final Object o) throws Exception {
+    public boolean test(final T object) throws Exception {
         // We've already removed the reference, don't emit anymore items.
         if (lifecycleOwner == null) {
             return false;
