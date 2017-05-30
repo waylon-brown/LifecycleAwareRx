@@ -55,7 +55,7 @@ getMyObservable()
 	}));
 ```
 
-Each item that is emitted before you Activity/Fragment is ready is cached. Once it is active, each of the cached items are emitted in-order. This means all of your streams work is still done while the Activity/Fragment is setting up, but waits until it is active before subscribing where you would access your views.
+Each item that is emitted before your Activity/Fragment is ready is cached. Once it is active, each of the cached items are emitted in-order. This means all of your streams work is still done while the Activity/Fragment is setting up, but waits until it is active before subscribing where you would access your views.
 
 You can also add `takeLast(1)` above the `compose()` call to have your Observable only emit the latest cached item upon subscription as opposed to all of them.
 
