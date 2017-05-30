@@ -37,7 +37,7 @@ Here you pass in your Observer (or `DisposableObserver`, `MaybeObserver`, `Dispo
 ```Java
 getMyObservable()
 	.filter(LifecycleBinder.notDestroyed(this)) // Building on the example from earlier to show the full stream
-	.compose(LifecycleBinder.subscribeWhenReady(this, new DisposableObserver<Listing>() {
+	.compose(LifecycleBinder.subscribeWhenReady(this, new DisposableObserver<MyReturnedObject>() {
 
 		@Override
 		public void onNext(final MyReturnedObject myReturnedObject) {
