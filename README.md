@@ -28,9 +28,11 @@ getMyObservable()	// each of the other base reactive types are also supported (S
 
 where `this` is your Activity or Fragment. This automatically stops emitting items (downstream from `filter()`) and throws away the LifecycleOwner (your Activity or Fragment) reference as soon as it hits `onDestroy()`. If you're using Observables, you can use `takeWhile()` here instead of `filter()` to tell the stream to complete as soon as the first item is emitted while the LifecycleOwner is destroyed. This calls `onComplete()`, so be careful not to access views there.
 
+Note: Adding `filter()` to a `Single` returns a `Maybe` so you should use a `MaybeObserver` at time of subscribing, remember this if you're wondering why you have a "inferred type is not within it's bounds" error.
+
 #### Make your stream not emit any items until your Activity/Fragment is active so that you don't prematurely access your views
 
-Here you pass in your Observer (or `DisposableObserver`, `SingleObserver`, `SingleDisposableObserver`, etc).
+Here you pass in your Observer (or `DisposableObserver`, `MaybeObserver`, `DisposableMaybeObserver`, etc).
 
 ```Java
 getMyObservable()
