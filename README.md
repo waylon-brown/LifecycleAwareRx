@@ -41,7 +41,7 @@ getMyObservable()
 
 		@Override
 		public void onNext(final MyReturnedObject myReturnedObject) {
-    			updateViews(myReturnedObject); // Feel secure knowing that this is only called if the Activity/Fragment is active
+    			myMethodToUpdateViews(myReturnedObject); // Feel secure knowing that this is only called if the Activity/Fragment is active
 		}
 
 		@Override
