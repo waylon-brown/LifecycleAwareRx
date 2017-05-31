@@ -361,11 +361,11 @@ public class LifecycleTest {
 	private static class TestLifecycle extends Lifecycle {
 		
 		private State state = State.STARTED;
-		private RxLifecycleObserver observer;
+		private LifecycleObserver observer;
 
 		@Override
 		public void addObserver(final LifecycleObserver observer) {
-			this.observer = (RxLifecycleObserver)observer;
+			this.observer = observer;
 		}
 
 		@Override
@@ -380,7 +380,13 @@ public class LifecycleTest {
 		public void setCurrentState(State state) {
 			this.state = state;
 			if (observer != null) {
-				observer.onStateChange();
+				// Used in subscribeWhenReady()
+				if (observer instanceof RxLifecycleObserver) {
+					((RxLifecycleObserver)observer).onStateChange();
+				} else if (observer instanceof LifecyclePredicate) {
+					// Used in notDestroyed()
+					((LifecyclePredicate)observer).onStateChange();
+				}
 			}
 		}
 	}
