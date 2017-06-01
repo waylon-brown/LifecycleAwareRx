@@ -16,48 +16,50 @@ Right now this is with the use of Google's new `LifecycleActivity` and `Lifecycl
 
 To reiterate from above, for now you first need to have your Activities and Fragments that want to use this extend `LifecycleActivity` and `LifecycleFragment`.
 
-#### Make your stream end once the Activity/Fragment is destroyed
-
-It's as simple as
-
-```Java
-getMyObservable()	// each of the other base reactive types are also supported (Single, Maybe)
-	.filter(LifecycleBinder.notDestroyed(this))
-	...
-```
-
-where `this` is your Activity or Fragment. This automatically stops emitting items (downstream from `filter()`) and throws away the LifecycleOwner (your Activity or Fragment) reference as soon as it hits `onDestroy()`. If you're using Observables, you can use `takeWhile()` here instead of `filter()` to tell the stream to complete as soon as the first item is emitted while the LifecycleOwner is destroyed. This calls `onComplete()`, so be careful not to access views there.
-
-Note: Adding `filter()` to a `Single` returns a `Maybe` so you should use a `MaybeObserver` at time of subscribing, remember this if you're wondering why you have a "inferred type is not within it's bounds" error.
-
-#### Make your stream not emit any items until your Activity/Fragment is active so that you don't prematurely access your views
-
-Here you pass in your Observer (or `DisposableObserver`, `MaybeObserver`, `DisposableMaybeObserver`, etc).
+Then it's as simple as
 
 ```Java
 getMyObservable()
-	.filter(LifecycleBinder.notDestroyed(this)) // Building on the example from earlier to show the full stream
-	.compose(LifecycleBinder.subscribeWhenReady(this, new DisposableObserver<MyReturnedObject>() {
-
+	.compose(LifecycleBinder.bind(this, new DisposableObserver<MyObject>() {
 		@Override
-		public void onNext(final MyReturnedObject myReturnedObject) {
-    			myMethodToUpdateViews(myReturnedObject); // Feel secure knowing that this is only called if the Activity/Fragment is active
+		public void onNext(final <MyObject> myObject) {
+			updateMyViewsWithData(myObject); // You can safely update your views here, knowing the Activity/Fragment isn't destroyed
 		}
-
+		
 		@Override
 		public void onError(final Throwable e) {
-		    	showErrorView(e);
+			updateMyViewsWithError(e); // Same here, except you need to do a state check here with Singles! See the note under "Singles are special" as to why.
 		}
 
 		@Override
 		public void onComplete() {
 		}
 	}));
+		
 ```
 
-Each item that is emitted before your Activity/Fragment is ready is cached. Once it is active, each of the cached items are emitted in-order. This means all of your streams work is still done while the Activity/Fragment is setting up, but waits until it is active before subscribing where you would access your views.
+where 
 
-You can also add `takeLast(1)` above the `compose()` call to have your Observable only emit the latest cached item upon subscription as opposed to all of them.
+* `getMyObservable()` could also instead be a `Single` or `Maybe`
+* `this` is your Activity or Fragment
+* `DisposableObserver` could instead be a regular `Observer`, or could otherwise be the correct type for your reactive type such as `SingleObserver`, `DisposableSingleObserver`, etc.
+
+This automatically stops emitting items and throws away the LifecycleOwner (your Activity or Fragment) reference as soon as it hits `onDestroy()`. It also waits until your Activity/Fragment has its `onStart()` called before emitting any items, ensuring your views are ready to be updated. 
+
+Because items are cached if they aren't yet ready to be emitted then are all emitted in-order once the onStart() is called, with Observables you can use `takeLast(1)` before you call `compose()` if you only want the last item cached to be emitted at that point instead of all items cached to be emitted.
+
+## Singles are special
+Singles can't be empty, they either represent a success or a failure. Because of this, if the onDestroy() is called before the Single emits its item, it will emit an `onError()` with a `NoSuchElementException()`. Because of this, you need to make sure to do the following check if you want to update your views in onError() if the stream is a Single (**Observables and Maybes don't need this check**).
+
+```Java
+// This is within your Single's Observer that is uses inside of the compose()
+@Override
+public void onError(final Throwable e) {
+	if (getLifecycle().getCurrentState() != State.DESTROYED) {
+		updateMyViewsWithError(e);
+	}
+}
+```
 
 ## Add to your project
 Add the jitpack repository if you haven't already to your *top-level project build.gradle.*

@@ -14,10 +14,10 @@ import com.waylonbrown.lifecycleawarerx.util.LifecycleUtil;
  * Observes state changes that happen to the {@link LifecycleOwner}, and subscribes to the stream once the lifecycle is 
  * active.
  * 
- * @param <R>
- * @param <O>
+ * @param <R> base reactive type
+ * @param <O> observer type
  */
-public class RxLifecycleObserver<R, O> implements LifecycleObserver {
+public class SubscribeWhenReadyObserver<R, O> implements LifecycleObserver {
     /**
      * Since we're holding a reference to the LifecycleOwner, it's important that we remove this reference as soon
      * as it reaches a destroyed state to prevent a memory leak. Not using @NonNull since it is to later be set to null.
@@ -29,7 +29,7 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
     private BaseReactiveTypeWithObserver<R, O> baseReactiveType;
     private boolean subscribed = false;
 
-    RxLifecycleObserver(@NonNull final LifecycleOwner lifecycleOwner) {
+    SubscribeWhenReadyObserver(@NonNull final LifecycleOwner lifecycleOwner) {
         this.lifecycleOwner = lifecycleOwner;
         lifecycleOwner.getLifecycle().addObserver(this);
     }
@@ -53,6 +53,7 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
             lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
 
             // No memory leaks please
+            this.lifecycleOwner.getLifecycle().removeObserver(this);
             this.lifecycleOwner = null;
             this.baseReactiveType = null;
         } else if (LifecycleUtil.isInActiveState(lifecycleOwner) 
@@ -77,7 +78,7 @@ public class RxLifecycleObserver<R, O> implements LifecycleObserver {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        RxLifecycleObserver that = (RxLifecycleObserver) o;
+        SubscribeWhenReadyObserver that = (SubscribeWhenReadyObserver) o;
 
         return lifecycleOwner != null ? lifecycleOwner.equals(that.lifecycleOwner) : that.lifecycleOwner == null;
     }

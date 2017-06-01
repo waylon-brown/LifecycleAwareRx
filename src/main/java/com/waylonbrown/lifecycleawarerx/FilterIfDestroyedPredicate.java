@@ -15,12 +15,12 @@ import io.reactivex.functions.Predicate;
  * Implements {@link LifecycleObserver} just so that it can remove the {@link LifecycleOwner} reference once it hits 
  * the destroyed state.
  */
-public class LifecyclePredicate<T> implements Predicate<T>, LifecycleObserver {
+public class FilterIfDestroyedPredicate<T> implements Predicate<T>, LifecycleObserver {
 
     @Nullable
     private LifecycleOwner lifecycleOwner;
 
-    LifecyclePredicate(@NonNull LifecycleOwner lifecycleOwner) {
+    FilterIfDestroyedPredicate(@NonNull LifecycleOwner lifecycleOwner) {
         this.lifecycleOwner = lifecycleOwner;
         this.lifecycleOwner.getLifecycle().addObserver(this);
     }
@@ -46,6 +46,7 @@ public class LifecyclePredicate<T> implements Predicate<T>, LifecycleObserver {
     void onStateChange() {
         if (lifecycleOwner != null && lifecycleOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
             // No memory leaks please
+            lifecycleOwner.getLifecycle().removeObserver(this);
             lifecycleOwner = null;
         }
     }
